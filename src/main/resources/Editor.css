@@ -1,0 +1,17 @@
+.code-area {
+    -fx-background-color: #000000;
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 15px;
+}
+
+.code-area .text {
+    -fx-fill: #ffffff;
+}
+
+.code-area .paragraph-box {
+    -fx-background-color: #000000;
+}
+
+.code-area .caret {
+    -fx-stroke: #ffffff;
+}

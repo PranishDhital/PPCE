@@ -24,6 +24,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+
+
         CodeArea editor = new CodeArea();
 
         editor.setParagraphGraphicFactory(
@@ -38,11 +40,12 @@ public class App extends Application {
                 """);
 
         editor.setStyle("""
-                -fx-font-family: 'Consolas';
-                -fx-font-size: 15px;
-                -fx-background-color: #1e1e2e;
-                -fx-fill: #cdd6f4;
-                """);
+        -fx-font-family: 'JetBrains Mono';
+        -fx-font-size: 15px;
+        -fx-background-color: #000000;
+        -fx-control-inner-background: #000000;
+        -fx-text-fill: #ffffff;
+        """);
 
         Menu fileMenu = new Menu("File");
 
@@ -62,7 +65,7 @@ public class App extends Application {
         MenuBar menuBar = new MenuBar(fileMenu);
 
         Button runButton = new Button("▶ Run");
-        Label title = new Label("PPC Editor");
+        Label title = new Label("PPCE");
         title.setStyle("-fx-font-weight: bold;");
 
         ToolBar toolbar = new ToolBar(
@@ -87,7 +90,9 @@ public class App extends Application {
         root.setStyle("-fx-background-color: #181825;");
 
         Scene scene = new Scene(root, 1100, 700);
-
+        scene.getStylesheets().add(
+                getClass().getResource("/editor.css").toExternalForm()
+        );
         stage.setTitle("PPC Editor");
         stage.setMinWidth(700);
         stage.setMinHeight(450);
