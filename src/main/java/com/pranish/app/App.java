@@ -1,4 +1,5 @@
 package com.pranish.app;
+import com.pranish.highlighter.SyntaxHighlighter;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -36,6 +37,7 @@ public class App extends Application {
                  {
                     print(i);
                  }
+                 printnl ("Hello, There!");
                 """);
 
         editor.setStyle("""
@@ -104,6 +106,15 @@ public class App extends Application {
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/editor.css")).toExternalForm()
         );
+
+
+        editor.textProperty().addListener((obs, oldText, newText) ->
+                editor.setStyleSpans(0, SyntaxHighlighter.highlight(newText))
+        );
+
+        // highlight any initial text too
+        editor.setStyleSpans(0, SyntaxHighlighter.highlight(editor.getText()));
+
         stage.setTitle("PPCE");
         stage.setMinWidth(700);
         stage.setMinHeight(450);

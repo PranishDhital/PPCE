@@ -237,3 +237,12 @@
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
 }
+
+
+/* ---------- Syntax highlighting ---------- */
+.code-area .keyword { -fx-fill: #cba6f7; -fx-font-weight: bold; }
+.code-area .string  { -fx-fill: #a6e3a1; }
+.code-area .number  { -fx-fill: #fab387; }
+.code-area .comment { -fx-fill: #6c7086; -fx-font-style: italic; }
+.code-area .paren   { -fx-fill: #9399b2; }
+.code-area .brace   { -fx-fill: #f9e2af; }
