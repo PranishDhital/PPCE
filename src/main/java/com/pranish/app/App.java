@@ -10,15 +10,14 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.flowless.VirtualizedScrollPane;
+
+import java.util.Objects;
 
 public class App extends Application {
 
@@ -33,18 +32,22 @@ public class App extends Application {
         );
 
         editor.replaceText("""
-                // Welcome to PPC Editor!
-
-                // Write your PPC code here.
-
+                 for (int i = 0; i < 5; i++)
+                 {
+                    print(i);
+                 }
                 """);
 
         editor.setStyle("""
-        -fx-font-family: 'JetBrains Mono';
-        -fx-font-size: 15px;
-        -fx-background-color: #000000;
-        -fx-control-inner-background: #000000;
-        -fx-text-fill: #ffffff;
+         -fx-font-family: 'JetBrains Mono';
+        -fx-font-size: 16px;
+        -fx-background-color: #1e1e2e;
+        -fx-control-inner-background: #1e1e2e;
+        -fx-text-fill: #cdd6f4;
+        -fx-highlight-fill: #45475a;
+        -fx-highlight-text-fill: #cdd6f4;
+        -fx-focus-color: transparent;
+        -fx-faint-focus-color: transparent;
         """);
 
         Menu fileMenu = new Menu("File");
@@ -75,10 +78,18 @@ public class App extends Application {
         );
 
         Label status = new Label("Ready");
+        status.getStyleClass().add("status-label");
         status.setPadding(new Insets(6, 10, 6, 10));
 
-        HBox statusBar = new HBox(status);
-        statusBar.setPadding(new Insets(4));
+        Label languages = new Label("PPC & PPI");
+        languages.getStyleClass().add("status-label");
+        languages.setPadding(new Insets(6, 10, 6, 20));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox statusBar = new HBox(status, spacer, languages);
+        statusBar.getStyleClass().add("status-bar");
 
         VBox top = new VBox(menuBar, toolbar);
 
@@ -91,15 +102,14 @@ public class App extends Application {
 
         Scene scene = new Scene(root, 1100, 700);
         scene.getStylesheets().add(
-                getClass().getResource("/editor.css").toExternalForm()
+                Objects.requireNonNull(getClass().getResource("/editor.css")).toExternalForm()
         );
-        stage.setTitle("PPC Editor");
+        stage.setTitle("PPCE");
         stage.setMinWidth(700);
         stage.setMinHeight(450);
         stage.setScene(scene);
         stage.show();
     }
-
     public static void main(String[] args) {
         launch(args);
     }

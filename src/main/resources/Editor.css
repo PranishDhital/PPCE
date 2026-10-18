@@ -1,17 +1,239 @@
+/* Catppuccin Mocha
+   base    #1e1e2e   mantle  #181825   crust   #11111b
+   surface0 #313244  surface1 #45475a  overlay0 #6c7086
+   text    #cdd6f4   rosewater #f5e0dc  lavender #b4befe
+   mauve   #cba6f7   blue #89b4fa
+*/
+
+/* ---------- Editor ---------- */
 .code-area {
-    -fx-background-color: #000000;
+    -fx-background-color: #1e1e2e;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 15px;
 }
 
 .code-area .text {
-    -fx-fill: #ffffff;
+    -fx-fill: #cdd6f4;
 }
 
 .code-area .paragraph-box {
-    -fx-background-color: #000000;
+    -fx-background-color: #1e1e2e;
 }
 
 .code-area .caret {
-    -fx-stroke: #ffffff;
+    -fx-stroke: #f5e0dc; /* rosewater */
+}
+
+.code-area .selection {
+    -fx-fill: #45475a;
+}
+
+/* ---------- Line numbers ---------- */
+.lineno {
+    -fx-background-color: #181825;
+}
+
+.lineno .text {
+    -fx-fill: #6c7086;
+}
+
+/* ---------- Toolbar ---------- */
+.tool-bar {
+    -fx-background-color: #181825;
+    -fx-spacing: 10px;
+    -fx-padding: 5px 10px 5px 10px;
+}
+
+.tool-bar .button {
+    -fx-background-color: #313244;
+    -fx-text-fill: #cdd6f4;
+    -fx-background-radius: 6px;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: #45475a;
+}
+
+/* ---------- Menu bar ---------- */
+.menu-bar {
+    -fx-background-color: #181825;
+    -fx-padding: 2px 6px;
+}
+
+.menu-bar .menu-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+}
+
+.menu-bar .menu-button .label {
+    -fx-text-fill: #cdd6f4;
+}
+
+.menu-bar .menu-button:hover {
+    -fx-background-color: #313244;
+}
+
+/* ---------- Dropdown ---------- */
+.context-menu {
+    -fx-background-color: #1e1e2e;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: #45475a;
+    -fx-border-radius: 8px;
+    -fx-padding: 4px 0;
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+}
+
+.menu-item .label {
+    -fx-text-fill: #cdd6f4;
+}
+
+.menu-item .accelerator-text {
+    -fx-text-fill: #6c7086;
+}
+
+.menu-item:hover {
+    -fx-background-color: #313244;
+}
+
+.menu-item:hover .accelerator-text {
+    -fx-text-fill: #a6adc8;
+}
+
+.menu-item:disabled .label {
+    -fx-text-fill: #585b70;
+}
+
+.context-menu .separator .line {
+    -fx-border-color: #45475a;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* Submenu arrows, checkmarks, radio dots */
+.menu .right-container .arrow,
+.check-menu-item:checked .check,
+.radio-menu-item:checked .radio {
+    -fx-background-color: #cdd6f4;
+}
+/* ---------- Scrollbars ---------- */
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12px;
+}
+
+/* Track */
+.scroll-bar .track {
+    -fx-background-color: #1e1e2e;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+}
+
+/* Thumb (the draggable part) */
+.scroll-bar .thumb {
+    -fx-background-color: #45475a;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 2px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #585b70;
+}
+
+/* Hide the arrow buttons at each end */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: " ";
+}
+
+/* The little square where the two bars meet */
+.scroll-pane .corner,
+.virtualized-scroll-pane .corner {
+    -fx-background-color: #1e1e2e;
+}
+
+/* ---------- Scrollbars ---------- */
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12px;
+}
+
+/* Track */
+.scroll-bar .track {
+    -fx-background-color: #1e1e2e;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+}
+
+/* Thumb (the draggable part) */
+.scroll-bar .thumb {
+    -fx-background-color: #45475a;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 2px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #6c7086;
+}
+
+/* Hide the arrow buttons at each end */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: " ";
+}
+
+/* The little square where the two bars meet */
+.scroll-pane .corner,
+.virtualized-scroll-pane .corner {
+    -fx-background-color: #1e1e2e;
+}
+
+
+/* ---------- Status bar ---------- */
+.status-bar {
+    -fx-background-color: #181825;
+    -fx-border-color: #313244;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.status-label {
+    -fx-text-fill: #a6adc8;
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
 }
