@@ -246,3 +246,40 @@
 .code-area .comment { -fx-fill: #6c7086; -fx-font-style: italic; }
 .code-area .paren   { -fx-fill: #9399b2; }
 .code-area .brace   { -fx-fill: #f9e2af; }
+
+
+.split-pane {
+    -fx-background-color: #181825;
+    -fx-padding: 0;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: #313244;
+    -fx-padding: 0 1 0 1;
+}
+
+.tree-view {
+    -fx-background-color: #181825;
+    -fx-control-inner-background: #181825;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.tree-cell {
+    -fx-text-fill: #cdd6f4;
+    -fx-background-color: transparent;
+    -fx-font-size: 13px;
+}
+
+.tree-cell:hover {
+    -fx-background-color: #313244;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #45475a;
+    -fx-text-fill: #cdd6f4;
+}
+
+.tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: #a6adc8;
+}

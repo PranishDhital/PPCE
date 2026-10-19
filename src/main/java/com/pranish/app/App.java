@@ -1,16 +1,11 @@
 package com.pranish.app;
 import com.pranish.highlighter.SyntaxHighlighter;
+import com.pranish.filetree.FileTree;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Separator;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -18,6 +13,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
+import java.io.File;
 import java.util.Objects;
 
 public class App extends Application {
@@ -27,14 +23,20 @@ public class App extends Application {
 
 
         CodeArea editor = new CodeArea();
+        File rootFile = new File(System.getProperty("user.home"));
+        FileTree rootItem = new FileTree(rootFile);
+        rootItem.setExpanded(true);
+
 
         editor.setParagraphGraphicFactory(
                 LineNumberFactory.get(editor)
         );
 
         editor.replaceText("""
+                 // for loop
                  for (int i = 0; i < 5; i++)
                  {
+                 // This prints the value of i
                     print(i);
                  }
                  printnl ("Hello, There!");
@@ -115,6 +117,33 @@ public class App extends Application {
         // highlight any initial text too
         editor.setStyleSpans(0, SyntaxHighlighter.highlight(editor.getText()));
 
+        TreeView<File> treeView = new TreeView<>(rootItem);
+
+        // show the file name only insyead of the entire path
+        treeView.setCellFactory(tv -> new TreeCell<File>() {
+            @Override
+            protected void updateItem(File item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName().isEmpty() ? item.getPath() : item.getName());
+                }
+            }
+        });
+
+        VirtualizedScrollPane<CodeArea> editorPane = new VirtualizedScrollPane<>(editor);
+
+        SplitPane splitPane = new SplitPane(editorPane, treeView);
+        splitPane.setDividerPositions(0.5);
+        SplitPane.setResizableWithParent(splitPane,  false);
+
+        BorderPane borderPane = new BorderPane();
+        root.setTop(top);
+        root.setCenter(splitPane);
+        root.setBottom(statusBar);
+
+
         stage.setTitle("PPCE");
         stage.setMinWidth(700);
         stage.setMinHeight(450);
@@ -123,5 +152,16 @@ public class App extends Application {
     }
     public static void main(String[] args) {
         launch(args);
+    }
+
+    // helps to open in editor
+    private void openInEditor(File file, CodeArea editor, Label status) {
+        try {
+            String content = java.nio.file.Files.readString(file.toPath());
+            editor.replaceText(content);
+            status.setText("Opened: " + file.getName());
+        } catch (java.io.IOException ex) {
+            status.setText("Could not open: " + ex.getMessage());
+        }
     }
 }
