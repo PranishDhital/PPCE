@@ -6,18 +6,25 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Objects;
 
 public class App extends Application {
-
+    private File currentFile = null;
     @Override
     public void start(Stage stage) {
 
@@ -26,8 +33,9 @@ public class App extends Application {
         File rootFile = new File(System.getProperty("user.home"));
         FileTree rootItem = new FileTree(rootFile);
         rootItem.setExpanded(true);
+        TreeView<File> treeView = new TreeView<>(rootItem);
 
-
+        Label status = new Label("Ready");
         editor.setParagraphGraphicFactory(
                 LineNumberFactory.get(editor)
         );
@@ -62,10 +70,47 @@ public class App extends Application {
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(e -> stage.close());
 
+        MenuItem openFile = new MenuItem("Open");
+        openFile.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open File");
+
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                    new FileChooser.ExtensionFilter("Text Files", "*.pd"),
+                    new FileChooser.ExtensionFilter("Text Files", "*.*")
+            );
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                openInEditor(file,editor,status);
+            }
+        });
+
+        MenuItem openFolder = new MenuItem("Open Folder");
+        openFolder.setOnAction(e -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Open Folder");
+
+            directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            File dir = directoryChooser.showDialog(stage);
+            if (dir != null) {
+                FileTree newRoot = new FileTree(dir);
+                newRoot.setExpanded(true);
+                treeView.setRoot(newRoot);
+                status.setText("Folder: " + dir.getAbsolutePath());
+            }
+        });
+
+        MenuItem save = new MenuItem("Save");
+        save.setOnAction(e -> saveFile(stage, editor, status));
+        save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+
         fileMenu.getItems().addAll(
                 newFile,
-                new MenuItem("Open"),
-                new MenuItem("Save"),
+                openFile,
+                openFolder,
+                save,
                 exit
         );
 
@@ -81,9 +126,13 @@ public class App extends Application {
                 runButton
         );
 
-        Label status = new Label("Ready");
+
         status.getStyleClass().add("status-label");
         status.setPadding(new Insets(6, 10, 6, 10));
+
+        Label version = new Label("v1.0.0");
+        version.getStyleClass().add("version-label");
+        version.setPadding(new Insets(6, 10, 6, 10));
 
         Label languages = new Label("PPC & PPI");
         languages.getStyleClass().add("status-label");
@@ -92,7 +141,7 @@ public class App extends Application {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox statusBar = new HBox(status, spacer, languages);
+        HBox statusBar = new HBox(status, spacer, languages,version);
         statusBar.getStyleClass().add("status-bar");
 
         VBox top = new VBox(menuBar, toolbar);
@@ -117,7 +166,15 @@ public class App extends Application {
         // highlight any initial text too
         editor.setStyleSpans(0, SyntaxHighlighter.highlight(editor.getText()));
 
-        TreeView<File> treeView = new TreeView<>(rootItem);
+
+        treeView.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                TreeItem<File> selected = treeView.getSelectionModel().getSelectedItem();
+                if (selected != null && selected.getValue().isFile()) {
+                    openInEditor(selected.getValue(), editor, status);
+                }
+            }
+        });
 
         // show the file name only insyead of the entire path
         treeView.setCellFactory(tv -> new TreeCell<File>() {
@@ -144,6 +201,7 @@ public class App extends Application {
         root.setBottom(statusBar);
 
 
+
         stage.setTitle("PPCE");
         stage.setMinWidth(700);
         stage.setMinHeight(450);
@@ -157,11 +215,47 @@ public class App extends Application {
     // helps to open in editor
     private void openInEditor(File file, CodeArea editor, Label status) {
         try {
-            String content = java.nio.file.Files.readString(file.toPath());
-            editor.replaceText(content);
+            editor.replaceText(Files.readString(file.toPath()));
+            currentFile = file;
             status.setText("Opened: " + file.getName());
         } catch (java.io.IOException ex) {
             status.setText("Could not open: " + ex.getMessage());
+        }
+    }
+    private void saveFile(Stage stage, CodeArea editor, Label status) {
+        if (currentFile == null) {
+            saveFileAs(stage, editor, status);
+            return;
+        }
+        writeToFile(currentFile, editor, status, stage);
+    }
+    private void saveFileAs(Stage stage, CodeArea editor, Label status) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save File");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PPC Files", "*.ppc", "*.ppi"),
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+        if (currentFile != null && currentFile.getParentFile() != null) {
+            chooser.setInitialDirectory(currentFile.getParentFile());
+            chooser.setInitialFileName(currentFile.getName());
+        }
+
+        File file = chooser.showSaveDialog(stage);
+        if (file != null) {
+            writeToFile(file, editor, status, stage);
+        }
+
+    }
+    private void writeToFile(File file, CodeArea editor, Label status, Stage stage) {
+        try {
+            Files.writeString(file.toPath(), editor.getText());
+            currentFile = file;
+            status.setText("Saved: " + file.getName());
+            stage.setTitle("PPCE - " + file.getName());
+        } catch (IOException ex) {
+            status.setText("Could not save: " + ex.getMessage());
         }
     }
 }

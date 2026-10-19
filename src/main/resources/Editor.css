@@ -225,7 +225,7 @@
 }
 
 
-/* ---------- Status bar ---------- */
+/* ---------- The Status bar ---------- */
 .status-bar {
     -fx-background-color: #181825;
     -fx-border-color: #313244;
@@ -233,6 +233,12 @@
 }
 
 .status-label {
+    -fx-text-fill: #a6adc8;
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+}
+
+.version-label{
     -fx-text-fill: #a6adc8;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
