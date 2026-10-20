@@ -289,3 +289,50 @@
 .tree-cell .tree-disclosure-node .arrow {
     -fx-background-color: #a6adc8;
 }
+
+/* ---------- FOR THEEE Terminal ---------- */
+.terminal-shell-label {
+    -fx-background-color: #181825;
+    -fx-text-fill: #a6adc8;
+    -fx-font-family: 'JetBrains Mono';
+    -fx-font-size: 12px;
+    -fx-padding: 4 10 4 10;
+    -fx-max-width: infinity;
+}
+
+.output {
+    -fx-control-inner-background: #11111b;
+    -fx-background-color: #11111b;
+    -fx-background-insets: 0;
+    -fx-text-fill: #cdd6f4;
+    -fx-highlight-fill: #45475a;
+    -fx-highlight-text-fill: #cdd6f4;
+    -fx-font-family: 'JetBrains Mono';
+    -fx-font-size: 13px;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.output .content {
+    -fx-background-color: #11111b;
+}
+
+.input {
+    -fx-background-color: #1e1e2e;
+    -fx-background-insets: 0;
+    -fx-text-fill: #cdd6f4;
+    -fx-prompt-text-fill: #6c7086;
+    -fx-font-family: 'JetBrains Mono';
+    -fx-font-size: 13px;
+    -fx-padding: 8 10 8 10;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.output .scroll-bar,
+.tree-view .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.output .scroll-bar .thumb,
+.tree-view .scroll-bar .thumb {
