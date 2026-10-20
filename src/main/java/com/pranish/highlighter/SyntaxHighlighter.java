@@ -8,47 +8,62 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SyntaxHighlighter {
+/** Adds language-aware style classes to the PPCE editor text. */
+public final class SyntaxHighlighter {
 
-    private static  final String[] keywords = {
-            "if","else","while","let","int","double","string","return","bool","exit","print","printnl","input", "for"
-    };
+    private static final String COMMENT = "//[^\\n]*|/\\*[\\s\\S]*?\\*/";
+    private static final String STRING = "\"(?:[^\"\\\\]|\\\\.)*\"";
+    private static final String NUMBER = "\\b(?:0[xX][0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b";
+    private static final String TYPE = "\\b(?:int|double|string|bool)\\b";
+    private static final String KEYWORD = "\\b(?:if|else|while|for|return|let|exit)\\b";
+    private static final String BOOLEAN = "\\b(?:true|false)\\b";
+    private static final String BUILTIN = "\\b(?:printnl|print|input)\\b(?=\\s*\\()";
+    private static final String FUNCTION = "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()";
+    private static final String OPERATOR = "(?:==|!=|<=|>=|&&|\\|\\||\\+\\+|--|[+*/%<>=!&|^-])";
+    private static final String DELIMITER = "[(){}\\[\\],;.]";
 
-    private static final String KEYWORDS_PATTERN = "\\b(" + String.join("|", keywords) + ")\\b";
-    private static final String COMMENTS_PATTERN = "//[^\n]*|/\\*(.|\\R)*?\\*/";
-    private static final String STRINGS_PATTERN  = "\"([^\"\\\\]|\\\\.)*\"";
-    private static final String NUMBERS_PATTERN  = "\\b\\d+(\\.\\d+)?\\b";
-    private static final String PARENS_PATTERN   = "[()]";
-    private static final String BRACES_PATTERN   = "[{}]";
+    /* Match comments and strings first so their contents are never read as code. */
+    private static final Pattern TOKEN_PATTERN = Pattern.compile(
+            "(?<COMMENT>" + COMMENT + ")"
+                    + "|(?<STRING>" + STRING + ")"
+                    + "|(?<BOOLEAN>" + BOOLEAN + ")"
+                    + "|(?<BUILTIN>" + BUILTIN + ")"
+                    + "|(?<TYPE>" + TYPE + ")"
+                    + "|(?<KEYWORD>" + KEYWORD + ")"
+                    + "|(?<NUMBER>" + NUMBER + ")"
+                    + "|(?<FUNCTION>" + FUNCTION + ")"
+                    + "|(?<OPERATOR>" + OPERATOR + ")"
+                    + "|(?<DELIMITER>" + DELIMITER + ")");
 
-    // to compile a regex to a pattern so we can fuckign match it or idk sreach it
-    private static final Pattern PATTERN = Pattern.compile(
-            "(?<COMMENT>" + COMMENTS_PATTERN + ")"
-                    + "|(?<STRING>" + STRINGS_PATTERN + ")"
-                    + "|(?<KEYWORD>" + KEYWORDS_PATTERN + ")"
-                    + "|(?<NUMBER>" + NUMBERS_PATTERN + ")"
-                    + "|(?<PAREN>" + PARENS_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACES_PATTERN + ")"
-    );
+    private SyntaxHighlighter() {
+    }
 
     public static StyleSpans<Collection<String>> highlight(String text) {
-        Matcher matcher = PATTERN.matcher(text);
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        int last = 0;
+        Matcher matcher = TOKEN_PATTERN.matcher(text);
+        StyleSpansBuilder<Collection<String>> spans = new StyleSpansBuilder<>();
+        int previousEnd = 0;
 
-        while(matcher.find()){
-            String styleClass = matcher.group("COMMENT") != null ? "comment":
-                                matcher.group("STRING") != null ? "string" :
-                                matcher.group("KEYWORD") != null ? "keyword" :
-                                matcher.group("NUMBER") != null ? "number" :
-                                matcher.group("PAREN") != null ? "paren" :
-                                matcher.group("BRACE") != null ? "brace" : null;
-
-            spansBuilder.add(Collections.emptyList(), matcher.start() - last);
-            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
-            last = matcher.end();
+        while (matcher.find()) {
+            spans.add(Collections.emptyList(), matcher.start() - previousEnd);
+            spans.add(Collections.singleton(styleFor(matcher)), matcher.end() - matcher.start());
+            previousEnd = matcher.end();
         }
-        spansBuilder.add(Collections.emptyList(), text.length() - last);
-        return spansBuilder.create();
+
+        spans.add(Collections.emptyList(), text.length() - previousEnd);
+        return spans.create();
+    }
+
+    private static String styleFor(Matcher matcher) {
+        if (matcher.group("COMMENT") != null) return "comment";
+        if (matcher.group("STRING") != null) return "string";
+        if (matcher.group("BOOLEAN") != null) return "boolean";
+        if (matcher.group("BUILTIN") != null) return "builtin";
+        if (matcher.group("TYPE") != null) return "type";
+        if (matcher.group("KEYWORD") != null) return "keyword";
+        if (matcher.group("NUMBER") != null) return "number";
+        if (matcher.group("FUNCTION") != null) return "function";
+        if (matcher.group("OPERATOR") != null) return "operator";
+        if (matcher.group("DELIMITER") != null) return "delimiter";
+        throw new IllegalStateException("Matched text without a syntax style");
     }
 }

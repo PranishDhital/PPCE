@@ -5,6 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class FileTree extends TreeItem<File> {
     private boolean isFirstTimeChildren = true;
@@ -35,17 +37,19 @@ public class FileTree extends TreeItem<File> {
     }
 
     private ObservableList<TreeItem<File>> buildChildren(TreeItem<File> item) {
-        File file = item.getValue();
-        if (file != null && file.isDirectory()) {
-            File[] files = file.listFiles();
+        File f = item.getValue();
+        ObservableList<TreeItem<File>> children = FXCollections.observableArrayList();
+        if (f != null && f.isDirectory()) {
+            File[] files = f.listFiles();
             if (files != null) {
-                ObservableList<TreeItem<File>> children = FXCollections.observableArrayList();
+                Arrays.sort(files, Comparator
+                        .comparing(File::isFile)                       // folders first
+                        .thenComparing(File::getName, String.CASE_INSENSITIVE_ORDER));
                 for (File child : files) {
                     children.add(new FileTree(child));
                 }
-                return children;
             }
         }
-        return FXCollections.observableArrayList();
+        return children;
     }
 }

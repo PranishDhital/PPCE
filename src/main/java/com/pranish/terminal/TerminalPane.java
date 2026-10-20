@@ -157,4 +157,22 @@ public class TerminalPane extends BorderPane {
     {
         input.requestFocus();
     }
+
+    public void clear()
+    {
+        output.clear();
+    }
+
+    public void run(String displayText, String command)
+    {
+        output.clear();
+        output.appendText(displayText);
+        send(command);
+    }
+    public void println(String text)
+    {
+        output.appendText(text + "\n");
+    }
+
+
 }
