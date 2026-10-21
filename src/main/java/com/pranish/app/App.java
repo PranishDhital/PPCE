@@ -15,6 +15,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -119,9 +121,13 @@ public class App extends Application {
         // ---------- Layout: editor + (hidden) terminal, tree on the right ----------
         VirtualizedScrollPane<CodeArea> editorPane = new VirtualizedScrollPane<>(editor);
         terminal = new TerminalPane();
-
         SplitPane editorColumn = new SplitPane(editorPane);   // terminal is added when toggled
         editorColumn.setOrientation(Orientation.VERTICAL);
+        terminal.setOnClose(() -> {
+            editorColumn.getItems().remove(terminal);
+            terminal.stop();
+            editor.requestFocus();
+        });
 
         SplitPane splitPane = new SplitPane(editorColumn, treeView);
         splitPane.setDividerPositions(0.78);
@@ -285,21 +291,64 @@ public class App extends Application {
         toggleTerminalItem.setOnAction(e -> toggleTerminal.run());
         viewMenu.getItems().add(toggleTerminalItem);
 
+        MenuItem aboutItem = new MenuItem("About Us");
+        aboutItem.setOnAction(e -> aboutsec(stage));
+        viewMenu.getItems().add(aboutItem);
+
         Menu runMenu = new Menu("Run");
-        MenuItem runItem = new MenuItem("Run...");
+        MenuItem runItem = new MenuItem("Run");
         runItem.setAccelerator(new KeyCodeCombination(KeyCode.F5));
         runItem.setOnAction(e -> openRunChooser.run());
         runMenu.getItems().add(runItem);
 
         MenuBar menuBar = new MenuBar(fileMenu, viewMenu, runMenu);
 
-        // Open the centered tool search palette.
-        Button runButton = new Button("▶ Run");
-        runButton.setOnAction(e -> openRunChooser.run());
+        Label appName = new Label("PPCE");
+        appName.getStyleClass().add("app-title-name");
+        HBox brandGroup = new HBox(appName);
+        brandGroup.setAlignment(Pos.CENTER_LEFT);
 
-        Label title = new Label("PPCE");
-        title.setStyle("-fx-font-weight: bold;");
-        ToolBar toolbar = new ToolBar(title, new Separator(), runButton);
+        Label documentTitle = new Label("Untitled");
+        documentTitle.getStyleClass().add("document-title");
+        stage.titleProperty().addListener((obs, oldTitle, newTitle) -> {
+            String prefix = "PPCE - ";
+            documentTitle.setText(newTitle != null && newTitle.startsWith(prefix)
+                    ? newTitle.substring(prefix.length()) : "Untitled");
+        });
+
+        Region titleSpacer = new Region();
+        HBox.setHgrow(titleSpacer, Priority.ALWAYS);
+        Button minimizeButton = new Button("—");
+        Button maximizeButton = new Button("□");
+        Button closeWindowButton = new Button("×");
+        minimizeButton.getStyleClass().add("window-control-button");
+        maximizeButton.getStyleClass().add("window-control-button");
+        closeWindowButton.getStyleClass().addAll("window-control-button", "window-close-button");
+        minimizeButton.setOnAction(e -> stage.setIconified(true));
+        maximizeButton.setOnAction(e -> stage.setMaximized(!stage.isMaximized()));
+        closeWindowButton.setOnAction(e -> stage.close());
+        stage.maximizedProperty().addListener((obs, wasMaximized, isMaximized) ->
+                maximizeButton.setText(isMaximized ? "❐" : "□"));
+        HBox windowControls = new HBox(minimizeButton, maximizeButton, closeWindowButton);
+        windowControls.getStyleClass().add("window-controls");
+        HBox windowTitleBar = new HBox(14, brandGroup, documentTitle, titleSpacer, windowControls);
+        windowTitleBar.setAlignment(Pos.CENTER_LEFT);
+        windowTitleBar.getStyleClass().add("window-title-bar");
+        windowTitleBar.setOnMousePressed(event -> {
+            if (event.getClickCount() == 2) {
+                stage.setMaximized(!stage.isMaximized());
+            } else if (!(event.getTarget() instanceof Button) && !stage.isMaximized()) {
+                windowTitleBar.setUserData(new double[]{event.getScreenX() - stage.getX(),
+                        event.getScreenY() - stage.getY()});
+            }
+        });
+        windowTitleBar.setOnMouseDragged(event -> {
+            if (!(event.getTarget() instanceof Button) && !stage.isMaximized()
+                    && windowTitleBar.getUserData() instanceof double[] dragOffset) {
+                stage.setX(event.getScreenX() - dragOffset[0]);
+                stage.setY(event.getScreenY() - dragOffset[1]);
+            }
+        });
 
         // ---------- Status bar ----------
         Label version = new Label("v1.0.0");
@@ -318,12 +367,64 @@ public class App extends Application {
 
         // ---------- Root, scene, stage ----------
         BorderPane root = new BorderPane();
-        root.setTop(new VBox(menuBar, toolbar));
+        root.setTop(new VBox(windowTitleBar, menuBar));
         root.setCenter(splitPane);
         root.setBottom(statusBar);
         root.setStyle("-fx-background-color: #181825;");
 
-        Scene scene = new Scene(root, 1100, 700);
+        String[] resizeEdge = {""};
+        double[] resizeStart = new double[4]; // screen X, screen Y, width, height
+        root.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
+            if (stage.isMaximized()) {
+                resizeEdge[0] = "";
+                root.setCursor(Cursor.DEFAULT);
+                return;
+            }
+            double x = event.getX(), y = event.getY();
+            boolean left = x <= 6, right = x >= root.getWidth() - 6;
+            boolean top = y <= 6, bottom = y >= root.getHeight() - 6;
+            resizeEdge[0] = (top ? "N" : bottom ? "S" : "") + (left ? "W" : right ? "E" : "");
+            Cursor cursor = switch (resizeEdge[0]) {
+                case "N", "S" -> Cursor.V_RESIZE;
+                case "E", "W" -> Cursor.H_RESIZE;
+                case "NE" -> Cursor.NE_RESIZE;
+                case "SW" -> Cursor.SW_RESIZE;
+                case "NW" -> Cursor.NW_RESIZE;
+                case "SE" -> Cursor.SE_RESIZE;
+                default -> Cursor.DEFAULT;
+            };
+            root.setCursor(cursor);
+        });
+        root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            if (!resizeEdge[0].isEmpty()) {
+                resizeStart[0] = event.getScreenX();
+                resizeStart[1] = event.getScreenY();
+                resizeStart[2] = stage.getWidth();
+                resizeStart[3] = stage.getHeight();
+                event.consume();
+            }
+        });
+        root.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
+            if (resizeEdge[0].isEmpty() || stage.isMaximized()) return;
+            double dx = event.getScreenX() - resizeStart[0];
+            double dy = event.getScreenY() - resizeStart[1];
+            if (resizeEdge[0].contains("E")) stage.setWidth(Math.max(stage.getMinWidth(), resizeStart[2] + dx));
+            if (resizeEdge[0].contains("S")) stage.setHeight(Math.max(stage.getMinHeight(), resizeStart[3] + dy));
+            if (resizeEdge[0].contains("W")) {
+                double width = Math.max(stage.getMinWidth(), resizeStart[2] - dx);
+                stage.setX(resizeStart[0] + resizeStart[2] - width);
+                stage.setWidth(width);
+            }
+            if (resizeEdge[0].contains("N")) {
+                double height = Math.max(stage.getMinHeight(), resizeStart[3] - dy);
+                stage.setY(resizeStart[1] + resizeStart[3] - height);
+                stage.setHeight(height);
+            }
+            event.consume();
+        });
+        root.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> resizeEdge[0] = "");
+
+        Scene scene = new Scene(root, 1100, 700, Color.web("#181825"));
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/Editor.css")).toExternalForm());
 
@@ -339,6 +440,7 @@ public class App extends Application {
         stage.setTitle("PPCE");
         stage.setMinWidth(700);
         stage.setMinHeight(450);
+        stage.initStyle(StageStyle.UNDECORATED);
         stage.setScene(scene);
         stage.show();
     }
@@ -439,5 +541,56 @@ public class App extends Application {
         } catch (IOException ex) {
             status.setText("Could not save: " + ex.getMessage());
         }
+    }
+
+    private void aboutsec(Stage owner) {
+        Stage about = new Stage(StageStyle.TRANSPARENT);
+        about.initOwner(owner);
+        about.initModality(javafx.stage.Modality.WINDOW_MODAL);
+
+        Label heading = new Label("About PPCE");
+        heading.getStyleClass().add("run-dialog-heading");
+        Button closeButton = new Button("×");
+        closeButton.getStyleClass().add("run-dialog-close");
+        closeButton.setOnAction(event -> about.close());
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox header = new HBox(heading, spacer, closeButton);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Label description = new Label("PPCE is an editor for the .pd programming language.");
+        description.getStyleClass().add("run-dialog-description");
+        Label componentsHeading = new Label("The .pd toolchain");
+        componentsHeading.getStyleClass().add("about-section-heading");
+
+        VBox projects = new VBox(10,
+                createProjectLink("PPCE", "The .pd language editor", "https://github.com/PranishDhital/PPCE"),
+                createProjectLink("PPC", "The .pd compiler", "https://github.com/PranishDhital/PPC"),
+                createProjectLink("PPI", "The .pd interpreter", "https://github.com/PranishDhital/PDLex"));
+
+        VBox content = new VBox(16, header, description, componentsHeading, projects);
+        content.getStyleClass().addAll("run-dialog", "about-dialog");
+        content.setPadding(new Insets(20));
+        Scene scene = new Scene(content);
+        scene.setFill(Color.TRANSPARENT);
+        scene.getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("/Editor.css")).toExternalForm());
+        about.setScene(scene);
+        about.setTitle("About PPCE");
+        about.setOnShown(event -> {
+            about.setX(owner.getX() + (owner.getWidth() - about.getWidth()) / 2);
+            about.setY(owner.getY() + (owner.getHeight() - about.getHeight()) / 2);
+        });
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) about.close();
+        });
+        about.showAndWait();
+    }
+
+    private Hyperlink createProjectLink(String name, String description, String url) {
+        Hyperlink link = new Hyperlink(name + "  —  " + description);
+        link.getStyleClass().add("about-project-link");
+        link.setOnAction(event -> getHostServices().showDocument(url));
+        return link;
     }
 }

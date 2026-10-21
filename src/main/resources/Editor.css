@@ -37,7 +37,55 @@
     -fx-fill: #6c7086;
 }
 
-/* ---------- Toolbar ---------- */
+/* ---------- Window title bar ---------- */
+.window-title-bar {
+    -fx-background-color: #11111b;
+    -fx-padding: 0 0 0 12;
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-border-color: transparent transparent #313244 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.app-title-name {
+    -fx-text-fill: #cdd6f4;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.document-title {
+    -fx-text-fill: #9399b2;
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 0 18;
+}
+
+.window-controls {
+    -fx-spacing: 0;
+}
+
+.window-control-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-text-fill: #a6adc8;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-min-width: 46px;
+    -fx-pref-width: 46px;
+    -fx-min-height: 37px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.window-control-button:hover {
+    -fx-background-color: #313244;
+    -fx-text-fill: #cdd6f4;
+}
+
+.window-close-button:hover {
+    -fx-background-color: #f38ba8;
+    -fx-text-fill: #11111b;
+}
+
 .tool-bar {
     -fx-background-color: #181825;
     -fx-spacing: 10px;
@@ -180,6 +228,30 @@
 .run-dialog-description {
     -fx-text-fill: #a6adc8;
     -fx-font-size: 13px;
+}
+
+.about-dialog {
+    -fx-pref-width: 430px;
+}
+
+.about-section-heading {
+    -fx-text-fill: #cdd6f4;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.about-project-link {
+    -fx-text-fill: #89b4fa;
+    -fx-font-size: 13px;
+    -fx-padding: 4px 0;
+    -fx-border-color: transparent;
+    -fx-underline: false;
+    -fx-cursor: hand;
+}
+
+.about-project-link:hover {
+    -fx-text-fill: #b4befe;
+    -fx-underline: true;
 }
 
 .run-dialog-close {
@@ -433,6 +505,19 @@
     -fx-max-width: infinity;
 }
 
+.terminal-close-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #a6adc8;
+    -fx-font-size: 16px;
+    -fx-padding: 2 10 2 10;
+    -fx-cursor: hand;
+}
+
+.terminal-close-button:hover {
+    -fx-background-color: #313244;
+    -fx-text-fill: #f38ba8;
+}
+
 .output {
     -fx-control-inner-background: #11111b;
     -fx-background-color: #11111b;
@@ -442,24 +527,13 @@
     -fx-highlight-text-fill: #cdd6f4;
     -fx-font-family: 'JetBrains Mono';
     -fx-font-size: 13px;
+    -fx-padding: 8 12 8 12;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
 
 .output .content {
     -fx-background-color: #11111b;
-}
-
-.input {
-    -fx-background-color: #1e1e2e;
-    -fx-background-insets: 0;
-    -fx-text-fill: #cdd6f4;
-    -fx-prompt-text-fill: #6c7086;
-    -fx-font-family: 'JetBrains Mono';
-    -fx-font-size: 13px;
-    -fx-padding: 8 10 8 10;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
 }
 
 .output .scroll-bar,
