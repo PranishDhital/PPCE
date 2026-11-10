@@ -20,7 +20,7 @@ public class ToolManager {
 
     public static Path get(String name) throws IOException{
         String os = os();
-        String osFolder = os.equals("windows") ? "Windows" : os;
+        String osFolder = os;
         String folder = name.toUpperCase();
         String file = os.equals("windows") ? name + ".exe": name;
 
